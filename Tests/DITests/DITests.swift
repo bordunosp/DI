@@ -14,8 +14,8 @@ final class diTests: XCTestCase {
             DIServiceItem(isSingleton: false, serviceName: "MyService_InitFunc", serviceInitFunc: { MyTestService() })
         ])
 
-        let retrievedService1: MyTestService = try DI.get(MyTestService.self, "MyService_InitFunc")
-        let retrievedService2: MyTestService = try DI.get(MyTestService.self, "MyService_InitFunc")
+        let retrievedService1: MyTestService = try DI.get("MyService_InitFunc")
+        let retrievedService2: MyTestService = try DI.get("MyService_InitFunc")
 
         XCTAssertTrue(retrievedService1.val() == "value string")
         XCTAssertTrue(retrievedService2.val() == "value string")
@@ -27,7 +27,7 @@ final class diTests: XCTestCase {
             DIServiceItem(isSingleton: false, serviceName: "MyService_InitFunc_IncorrectType", serviceInitFunc: { MyTestService() })
         ])
 
-        XCTAssertThrowsError(try DI.get(XCTestCase.self, "MyService_InitFunc_IncorrectType")) { error in
+        XCTAssertThrowsError(try DI.get("MyService_InitFunc_IncorrectType") as XCTestCase) { error in
             XCTAssertEqual(error as? DIError, DIError.serviceHasIncorrectType)
         }
     }
@@ -37,7 +37,7 @@ final class diTests: XCTestCase {
             DIServiceItem(isSingleton: true, serviceName: "MyService_Single", serviceInitFunc: { MyTestService() })
         ])
 
-        let retrievedService: MyTestService = try DI.get(MyTestService.self)
+        let retrievedService: MyTestService = try DI.get()
         XCTAssertTrue(retrievedService.val() == "value string")
     }
 
@@ -47,9 +47,9 @@ final class diTests: XCTestCase {
             DIServiceItem(isSingleton: true, serviceName: "MyService2_NonSingleton", serviceInitFunc: { MyTestService() }),
         ])
 
-        let returnedServiceValue1: MyTestService = try DI.get(MyTestService.self, "MyService1_NonSingleton")
-        let returnedServiceValue1_2: MyTestService = try DI.get(MyTestService.self, "MyService1_NonSingleton")
-        let returnedServiceValue2: MyTestService = try DI.get(MyTestService.self, "MyService2_NonSingleton")
+        let returnedServiceValue1: MyTestService = try DI.get("MyService1_NonSingleton")
+        let returnedServiceValue1_2: MyTestService = try DI.get("MyService1_NonSingleton")
+        let returnedServiceValue2: MyTestService = try DI.get("MyService2_NonSingleton")
 
         XCTAssertEqual(returnedServiceValue1.val(), returnedServiceValue2.val())
         XCTAssertFalse(returnedServiceValue1 === returnedServiceValue2)
@@ -71,20 +71,20 @@ final class diTests: XCTestCase {
             DIServiceItem(isSingleton: true, serviceName: "MyService1_IncorrectType", serviceInitFunc: { MyTestService() }),
         ])
 
-        XCTAssertThrowsError(try DI.get(XCTestCase.self, "MyService1_IncorrectType")) { error in
+        XCTAssertThrowsError(try DI.get("MyService1_IncorrectType") as XCTestCase) { error in
             XCTAssertEqual(error as? DIError, DIError.serviceHasIncorrectType)
         }
     }
 
 
     func testNotRegistered() throws {
-        XCTAssertThrowsError(try DI.get(XCTestCase.self)) { error in
+        XCTAssertThrowsError(try DI.get() as XCTestCase) { error in
             XCTAssertEqual(error as? DIError, DIError.serviceNotRegistered)
         }
     }
 
     func testNotRegisteredByName() throws {
-        XCTAssertThrowsError(try DI.get(MyTestService.self, "NotRegistered")) { error in
+        XCTAssertThrowsError(try DI.get("NotRegistered") as MyTestService) { error in
             XCTAssertEqual(error as? DIError, DIError.serviceNotRegistered)
         }
     }

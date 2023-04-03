@@ -28,11 +28,10 @@ public struct DI {
     }
 
     /**
-     - Parameter type: The type of the service to be returned.
      - Returns: The first registered service of type `T`.
      - Throws: A `DIError` if no service of the given type is registered.
      */
-    public static func get<T>(_ type: T.Type) throws -> T {
+    public static func get<T>() throws -> T {
         guard let service = _services.values.first(where: { $0 is T }) as? T else {
             throw DIError.serviceNotRegistered
         }
@@ -41,12 +40,11 @@ public struct DI {
 
     /**
      - Parameters:
-       - type: The type of the service to be returned.
        - serviceName: The unique name of the service.
      - Returns: The requested service of type `T`.
      - Throws: A `DIError` if the service is not registered or if it cannot be cast to the requested type.
     */
-    public static func get<T>(_ type: T.Type, _ serviceName: String) throws -> T {
+    public static func get<T>(_ serviceName: String) throws -> T {
         guard let service = _services[serviceName] else {
             throw DIError.serviceNotRegistered
         }

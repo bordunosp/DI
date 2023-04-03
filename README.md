@@ -5,7 +5,7 @@ DI is a simple dependency injection container for Swift. It allows you to regist
 You can install DI using the Swift Package Manager. Just add the following line to your Package.swift file:
 
 ```swift
-.package(url: "https://github.com/bordunosp/DI.git", from: "1.0.1")
+.package(url: "https://github.com/bordunosp/DI.git", from: "1.1.0")
 ```
 
 ## Usage
@@ -77,3 +77,13 @@ DI.register([
 let myServiceInstance: MyServiceProtocol = try DI.get(MyServiceProtocol.self)
 myServiceInstance.doSomething()
 ```
+
+
+---
+
+# #StandForUkraine 🇺🇦
+
+This project aims to show support for Ukraine and its people amidst a war that has been ongoing since 2014. This war has a genocidal nature and has led to the deaths of thousands, injuries to millions, and significant property damage. We believe that the international community should focus on supporting Ukraine and ensuring security and freedom for its people.
+
+Join us and show your support using the hashtag #StandForUkraine. Together, we can help bring attention to the issues faced by Ukraine and provide aid.
+
