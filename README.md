@@ -32,13 +32,13 @@ If the service should be a singleton (i.e. there should only be one instance of 
 To retrieve a service, call the get function with the type of the service you want to retrieve. If there are multiple services of that type registered, the first one that was registered will be returned.
 
 ```swift 
-let logger: ILogger = try DI.get(ILogger.self)
+let logger: ILogger = try DI.get()
 ```
 
 If you want to retrieve a specific service by name, call the get function with both the type and the name of the service.
 
 ```swift
-let logger: ILogger = try DI.get(ILogger.self, "ILogger")
+let logger: ILogger = try DI.get("ILogger")
 ```
 
 If no service of the given type or name is registered, a DIError will be thrown.
@@ -53,6 +53,8 @@ The following errors can be thrown when using DI:
 ## Example
 
 ```swift
+import DI
+
 // Define a protocol for your service
 protocol MyServiceProtocol {
     func doSomething()
@@ -74,7 +76,7 @@ DI.register([
 ])
 
 // Use the service
-let myServiceInstance: MyServiceProtocol = try DI.get(MyServiceProtocol.self)
+let myServiceInstance: MyServiceProtocol = try DI.get()
 myServiceInstance.doSomething()
 ```
 
