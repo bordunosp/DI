@@ -9,6 +9,38 @@ class MyTestService {
 
 final class diTests: XCTestCase {
 
+    func testSingleton() throws {
+        class Foo {
+            func val() -> String {
+                "value string"
+            }
+        }
+
+        try DI.register([
+            DIServiceItem(isSingleton: true, serviceName: "Foo", serviceInitFunc: { Foo() })
+        ])
+
+        let foo1: Foo = try DI.get()
+        let foo2: Foo = try DI.get()
+        XCTAssertTrue(foo1 === foo2)
+    }
+
+    func testNotSingleton() throws {
+        class Foo2 {
+            func val() -> String {
+                "value string"
+            }
+        }
+
+        try DI.register([
+            DIServiceItem(isSingleton: false, serviceName: "Foo2", serviceInitFunc: { Foo2() })
+        ])
+
+        let foo1: Foo2 = try DI.get("Foo2")
+        let foo2: Foo2 = try DI.get("Foo2")
+        XCTAssertTrue(foo1 !== foo2)
+    }
+
     func testDIServiceInitFunc() throws {
         try DI.register([
             DIServiceItem(isSingleton: false, serviceName: "MyService_InitFunc", serviceInitFunc: { MyTestService() })

@@ -1,3 +1,3 @@
 import Foundation
 
-public typealias DIServiceInitFunc = () throws -> AnyObject
+public typealias DIServiceInitFunc = () throws -> Any

@@ -5,7 +5,7 @@ DI is a simple dependency injection container for Swift. It allows you to regist
 You can install DI using the Swift Package Manager. Just add the following line to your Package.swift file:
 
 ```swift
-.package(url: "https://github.com/bordunosp/DI.git", from: "1.1.0")
+.package(url: "https://github.com/bordunosp/DI.git", from: "1.2.0")
 ```
 
 ## Usage
