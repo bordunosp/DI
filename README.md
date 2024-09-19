@@ -5,40 +5,85 @@ DI is a simple dependency injection container for Swift. It allows you to regist
 You can install DI using the Swift Package Manager. Just add the following line to your Package.swift file:
 
 ```swift
-.package(url: "https://github.com/bordunosp/DI.git", from: "1.2.0")
+.package(url: "https://github.com/bordunosp/DI.git", from: "2.0.0")
 ```
 
 ## Usage
 ### Registering services
 
-To register a service, create a DIServiceItem object containing a closure that initializes the service. The closure should return an instance of the service as AnyObject.
 
 ```swift
-DI.register([
-    DIServiceItem(
-        isSingleton: true,
-        serviceName: "ILogger",
-        serviceInitFunc: {
-            return Logger()
-        }
-    )
-])
-```
+protocol IAnimal {
+    func sayHi()
+}
 
-If the service should be a singleton (i.e. there should only be one instance of it), set the isSingleton parameter to true. Otherwise, set it to false.
+public struct CatService: IAnimal {
+    func sayHi() {
+        print("meow")
+    }
+}
+
+public struct DogService: IAnimal {
+    func sayHi() {
+        print("wow wow")
+    }
+}
+
+
+// register transient service
+try DI.add({ 
+    return CatService() 
+})
+
+// register transient service with name attribute
+try DI.add("Some Uniq Name for multiple services per one Type", { 
+    return CatService() 
+})
+
+// register transient service by Interface (protocol)
+try DI.add(IAnimal.self, { 
+    return CatService() 
+})
+
+// register transient service by Interface (protocol) with name attribute
+try DI.add(IAnimal.self, "Some Uniq Name for multiple services per one Type", { 
+    return CatService() 
+})
+
+
+// register singleton service
+try DI.addSingleton({ 
+    return DogService() 
+})
+
+// register singleton service with name attribute
+try DI.addSingleton("Some Uniq Name", { 
+    return DogService() 
+})
+
+// register singleton service by Interface (protocol)
+try DI.addSingleton(IAnimal.self, { 
+    return CatService() 
+})
+
+// register singleton service by Interface (protocol) with name attribute
+try DI.addSingleton(IAnimal.self, "Some Uniq Name for multiple services per one Type", { 
+    return CatService() 
+})
+```
 
 ## Retrieving services
 
 To retrieve a service, call the get function with the type of the service you want to retrieve. If there are multiple services of that type registered, the first one that was registered will be returned.
 
 ```swift 
-let logger: ILogger = try DI.get()
+let cat: CatService = try DI.resolve()
 ```
 
 If you want to retrieve a specific service by name, call the get function with both the type and the name of the service.
 
 ```swift
-let logger: ILogger = try DI.get("ILogger")
+let cat: CatService = try DI.resolve("Some Uniq Name for multiple services per one Type")
 ```
 
 If no service of the given type or name is registered, a DIError will be thrown.
@@ -51,33 +96,36 @@ The following errors can be thrown when using DI:
 - DIError.serviceAlreadyRegistered: A service with the same name is already registered.
 
 ## Example
+Magic rosolver by "DiResolve" attribute
+
 
 ```swift
 import DI
 
-// Define a protocol for your service
-protocol MyServiceProtocol {
-    func doSomething()
-}
-
-// Implement the protocol
-class MyService: MyServiceProtocol {
-    func doSomething() {
-        print("Did something")
+class SomeClass {
+    public func doSome() {
+        print("SomeClass")
     }
 }
 
-DI.register([
-    DIServiceItem(
-        isSingleton: true,
-        serviceName: "MyService",
-        serviceInitFunc: { MyService() }
-    )
-])
 
-// Use the service
-let myServiceInstance: MyServiceProtocol = try DI.get()
-myServiceInstance.doSomething()
+class SomeOtherClass {
+    @DiResolve()
+    public var someClass: SomeClass
+}
+
+try DI.add({
+    return SomeClass()
+})
+
+try DI.add({
+    return SomeOtherClass()
+})
+
+
+var service: SomeOtherClass = try DI.resolve()
+
+service.someClass.doSome()
 ```
 
 

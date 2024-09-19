@@ -1,59 +1,132 @@
 import Foundation
 
 public struct DI {
-    private static let _servicesLock = NSLock()
-    private static var _services = [String: Any]()
+    private static let _servicesLock = NSRecursiveLock()
+    nonisolated(unsafe) private static var _services = [String: Any]()
 
-    /**
-    Registers an array of services with the dependency injection container.
 
-    - Parameter services: An array of `DIServiceItem` objects representing the services to register.
-    - Throws: An error of type `DIError` if a service with the same name is already registered.
-    */
-    public static func register(_ services: [DIServiceItem]) throws {
+    public static func addSingleton<T>(_ interface: T.Type, _ initFunc: @escaping DIServiceInitFunc<T>) throws {
+        try addSingleton(interface, "", initFunc)
+    }
+
+    public static func addSingleton<T>(
+        _ interface: T.Type, _ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>
+    ) throws {
         _servicesLock.lock()
-        defer { _servicesLock.unlock() }
-
-        for service in services {
-            guard _services[service.serviceName] == nil else {
-                throw DIError.serviceAlreadyRegistered
-            }
-
-            if service.isSingleton {
-                _services[service.serviceName] = try service.serviceInitFunc()
-            } else {
-                _services[service.serviceName] = service.serviceInitFunc
-            }
+        defer {
+            _servicesLock.unlock()
         }
+
+        let objectIdentifier = ObjectIdentifier(T.self)
+        var hasher = Hasher()
+
+        objectIdentifier.hash(into: &hasher)
+
+        let key = String(hasher.finalize()) + name
+
+        guard _services[key] == nil else {
+            throw DIError.serviceAlreadyRegistered
+        }
+
+        _services[key] = try initFunc()
     }
 
-    /**
-     - Returns: The first registered service of type `T`.
-     - Throws: A `DIError` if no service of the given type is registered.
-     */
-    public static func get<T>() throws -> T {
-        guard let service = _services.values.first(where: { $0 is T }) as? T else {
-            throw DIError.serviceNotRegistered
-        }
-        return service
+    public static func addSingleton<T>(_ initFunc: @escaping DIServiceInitFunc<T>) throws {
+        try addSingleton("", initFunc)
     }
 
-    /**
-     - Parameters:
-       - serviceName: The unique name of the service.
-     - Returns: The requested service of type `T`.
-     - Throws: A `DIError` if the service is not registered or if it cannot be cast to the requested type.
-    */
-    public static func get<T>(_ serviceName: String) throws -> T {
-        guard let service = _services[serviceName] else {
+    public static func addSingleton<T>(
+        _ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>
+    ) throws {
+        _servicesLock.lock()
+        defer {
+            _servicesLock.unlock()
+        }
+
+        let objectIdentifier = ObjectIdentifier(T.self)
+        var hasher = Hasher()
+
+        objectIdentifier.hash(into: &hasher)
+
+        let key = String(hasher.finalize()) + name
+
+        guard _services[key] == nil else {
+            throw DIError.serviceAlreadyRegistered
+        }
+
+        _services[key] = try initFunc()
+    }
+
+    public static func add<T>(_ initFunc: @escaping DIServiceInitFunc<T>) throws {
+        try add("", initFunc)
+    }
+
+    public static func add<T>(_ interface: T.Type, _ initFunc: @escaping DIServiceInitFunc<T>) throws {
+        try add(interface, "", initFunc)
+    }
+
+    public static func add<T>(_ interface: T.Type, _ name: String, _ initFunc: @escaping DIServiceInitFunc<T>) throws {
+        _servicesLock.lock()
+        defer {
+            _servicesLock.unlock()
+        }
+
+        let objectIdentifier = ObjectIdentifier(T.self)
+        var hasher = Hasher()
+
+        objectIdentifier.hash(into: &hasher)
+
+        let key = String(hasher.finalize()) + name
+
+        guard _services[key] == nil else {
+            throw DIError.serviceAlreadyRegistered
+        }
+
+        _services[key] = initFunc
+    }
+
+    
+    public static func add<T>(_ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>)
+        throws
+    {
+        _servicesLock.lock()
+        defer {
+            _servicesLock.unlock()
+        }
+
+        let objectIdentifier = ObjectIdentifier(T.self)
+        var hasher = Hasher()
+
+        objectIdentifier.hash(into: &hasher)
+
+        let key = String(hasher.finalize()) + name
+
+        guard _services[key] == nil else {
+            throw DIError.serviceAlreadyRegistered
+        }
+
+        _services[key] = initFunc
+    }
+
+    public static func resolve<T>(_ name: String = "") throws -> T {
+        _servicesLock.lock()
+        defer {
+            _servicesLock.unlock()
+        }
+
+        let objectIdentifier = ObjectIdentifier(T.self)
+        var hasher = Hasher()
+
+        objectIdentifier.hash(into: &hasher)
+
+        let key = String(hasher.finalize()) + name
+
+        guard let service = _services[key] else {
             throw DIError.serviceNotRegistered
         }
 
-        if let diInitFunc = service as? DIServiceInitFunc {
-            guard let convertibleType = try diInitFunc() as? T else {
-                throw DIError.serviceHasIncorrectType
-            }
-            return convertibleType
+        if let factory = service as? DIServiceInitFunc<T> {
+            return try factory()
         }
 
         guard let convertibleType = service as? T else {
