@@ -1,9 +1,7 @@
 import Foundation
 
 public struct DI {
-    private static let _servicesLock = NSRecursiveLock()
     nonisolated(unsafe) private static var _services = [String: Any]()
-
 
     public static func addSingleton<T>(_ interface: T.Type, _ initFunc: @escaping DIServiceInitFunc<T>) throws {
         try addSingleton(interface, "", initFunc)
@@ -12,11 +10,6 @@ public struct DI {
     public static func addSingleton<T>(
         _ interface: T.Type, _ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>
     ) throws {
-        _servicesLock.lock()
-        defer {
-            _servicesLock.unlock()
-        }
-
         let objectIdentifier = ObjectIdentifier(T.self)
         var hasher = Hasher()
 
@@ -38,11 +31,6 @@ public struct DI {
     public static func addSingleton<T>(
         _ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>
     ) throws {
-        _servicesLock.lock()
-        defer {
-            _servicesLock.unlock()
-        }
-
         let objectIdentifier = ObjectIdentifier(T.self)
         var hasher = Hasher()
 
@@ -66,11 +54,6 @@ public struct DI {
     }
 
     public static func add<T>(_ interface: T.Type, _ name: String, _ initFunc: @escaping DIServiceInitFunc<T>) throws {
-        _servicesLock.lock()
-        defer {
-            _servicesLock.unlock()
-        }
-
         let objectIdentifier = ObjectIdentifier(T.self)
         var hasher = Hasher()
 
@@ -89,11 +72,6 @@ public struct DI {
     public static func add<T>(_ name: String = "", _ initFunc: @escaping DIServiceInitFunc<T>)
         throws
     {
-        _servicesLock.lock()
-        defer {
-            _servicesLock.unlock()
-        }
-
         let objectIdentifier = ObjectIdentifier(T.self)
         var hasher = Hasher()
 
@@ -109,11 +87,6 @@ public struct DI {
     }
 
     public static func resolve<T>(_ name: String = "") throws -> T {
-        _servicesLock.lock()
-        defer {
-            _servicesLock.unlock()
-        }
-
         let objectIdentifier = ObjectIdentifier(T.self)
         var hasher = Hasher()
 
