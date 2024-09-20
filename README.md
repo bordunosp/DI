@@ -5,7 +5,7 @@ DI is a simple dependency injection container for Swift. It allows you to regist
 You can install DI using the Swift Package Manager. Just add the following line to your Package.swift file:
 
 ```swift
-.package(url: "https://github.com/bordunosp/DI.git", from: "2.0.0")
+.package(url: "https://github.com/bordunosp/DI.git", from: "2.0.1")
 ```
 
 ## Usage
@@ -31,19 +31,13 @@ public struct DogService: IAnimal {
 
 
 // register transient service
-try DI.add({ 
-    return CatService() 
-})
+try DI.add({ CatService() })
 
 // register transient service with name attribute
-try DI.add("Some Uniq Name for multiple services per one Type", { 
-    return CatService() 
-})
+try DI.add("Some Uniq Name for multiple services per one Type", { CatService() })
 
 // register transient service by Interface (protocol)
-try DI.add(IAnimal.self, { 
-    return CatService() 
-})
+try DI.add(IAnimal.self, { CatService() })
 
 // register transient service by Interface (protocol) with name attribute
 try DI.add(IAnimal.self, "Some Uniq Name for multiple services per one Type", { 
@@ -52,19 +46,13 @@ try DI.add(IAnimal.self, "Some Uniq Name for multiple services per one Type", {
 
 
 // register singleton service
-try DI.addSingleton({ 
-    return DogService() 
-})
+try DI.addSingleton({ DogService() })
 
 // register singleton service with name attribute
-try DI.addSingleton("Some Uniq Name", { 
-    return DogService() 
-})
+try DI.addSingleton("Some Uniq Name", { DogService() })
 
 // register singleton service by Interface (protocol)
-try DI.addSingleton(IAnimal.self, { 
-    return CatService() 
-})
+try DI.addSingleton(IAnimal.self, { CatService() })
 
 // register singleton service by Interface (protocol) with name attribute
 try DI.addSingleton(IAnimal.self, "Some Uniq Name for multiple services per one Type", { 
@@ -114,14 +102,8 @@ class SomeOtherClass {
     public var someClass: SomeClass
 }
 
-try DI.add({
-    return SomeClass()
-})
-
-try DI.add({
-    return SomeOtherClass()
-})
-
+try DI.add({ SomeClass() })
+try DI.add({ SomeOtherClass() })
 
 var service: SomeOtherClass = try DI.resolve()
 
